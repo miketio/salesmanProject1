@@ -3,6 +3,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <ctime>
+#include "gnuplot-iostream.h"
 
 class City {
 public:
@@ -42,12 +43,16 @@ public:
         return 1.0 + 0.1 * total_weight / (max_weight * cities_number);
     }
 
-    double calculate_travel_time(const City& source, const City& destination, double total_weight_copy, int cities_number) {
+    std::vector<double> calculate_travel_time(const City& source, const City& destination, double total_weight_copy, int cities_number) {
         // Calculate total travel time between two cities, considering slowdown and waiting time
         double base_travel_time = calculate_base_travel_time(source, destination);
         double slowdown_factor = calculate_slowdown_factor(total_weight_copy, cities_number);
         double slowed_travel_time = base_travel_time * slowdown_factor;
-        return slowed_travel_time + wait_time;
+
+        std::vector<double> result(2);
+        result[0] = slowed_travel_time + wait_time;
+        result[1] = slowed_travel_time;  // Adding this for clarity, you can use result[0] directly if you prefer
+        return result;
     }
 
     double calculate_fuel_wasted(const City& source, const City& destination, double total_weight_copy) {
@@ -58,7 +63,7 @@ public:
         return fuel_consumption_base * (1 + 0.001 * total_weight);
     }
 
-    std::tuple<double, double, double> calculate_total_travel_time() {
+    std::vector<double> calculate_total_travel_time() {
         // Calculate the total travel time, updated current time, and remaining weight
         double current_weight = total_weight;
         double current_time_copy = current_time;
@@ -70,20 +75,25 @@ public:
             const auto& next_city = optimal_route[(i + 1) % optimal_route.size()];
             int cities_number = optimal_route.size();
 
-            total_travel_time += calculate_travel_time(city, next_city, current_weight, cities_number);
+            std::vector<double> travel_times = calculate_travel_time(city, next_city, current_weight, cities_number);
+            total_travel_time += travel_times[0];
             current_time_copy += total_travel_time;
             current_time_copy = std::fmod(current_time_copy, 24.0);
             current_weight -= next_city.package_weight;
             fuel_wasted += calculate_fuel_wasted(city, next_city, current_weight);
         }
 
-        return std::make_tuple(total_travel_time, current_time_copy, fuel_wasted);
+        std::vector<double> result(3);
+        result[0] = total_travel_time;
+        result[1] = current_time_copy;
+        result[2] = fuel_wasted;
+        return result;
     }
 
     double calculate_total_cost() {
         // Calculate the total cost, considering both hourly salary and fuel cost
-        auto [total_travel_time, _, fuel_wasted] = calculate_total_travel_time();
-        return total_travel_time * hourly_salary + fuel_wasted * fuel_cost_per_liter;
+        std::vector<double> travel_info = calculate_total_travel_time();
+        return travel_info[0] * hourly_salary + travel_info[2] * fuel_cost_per_liter;
     }
 
     void simulated_annealing_tsp(double initial_temperature, int iterations) {
@@ -114,12 +124,29 @@ public:
 
         optimal_route = best_salesman.optimal_route;
     }
-};
 
 // Function to plot cities and tour (not implemented in C++)
-void plot_cities_and_tour(const std::vector<City>& cities, const std::vector<City>& tour) {
-    // Implementation depends on the graphics library used in C++
-}
+    // Function to plot cities and the best tour using Gnuplot
+    void plotCitiesAndTour() const {
+        Gnuplot gp;
+
+        // Plot cities with larger red points and coordinates
+        gp << "plot '-' with points pt 7 ps 2 lc rgb 'red' title 'Cities', '-' with lines title 'Best Tour'\n";
+
+        for (const auto& city : optimal_route) {
+            gp << city.x << " " << city.y << "\n";
+        }
+        gp << "e\n";
+
+        for (const auto& city : optimal_route) {
+            gp << city.x << " " << city.y << "\n";
+        }
+        gp << optimal_route.front().x << " " << optimal_route.front().y << "\n"; // Close the loop
+        gp << "e\n";
+
+        gp.flush();
+    }
+};
 
 int main() {
     // Create a list of cities
@@ -154,8 +181,9 @@ int main() {
         const auto& next_city = salesman.optimal_route[(i + 1) % salesman.optimal_route.size()];
 
         std::cout << "(" << city.x << ", " << city.y << ") ";
-        double travel_time = salesman.calculate_travel_time(city, next_city, current_weight, salesman.optimal_route.size());
-        current_time_copy += travel_time;
+        std::vector<double> travel_info = salesman.calculate_travel_time(city, next_city, current_weight, salesman.optimal_route.size());
+        total_travel_time += travel_info[1];
+        current_time_copy += travel_info[0];
         current_time_copy = std::fmod(current_time_copy, 24.0);
         current_weight -= next_city.package_weight;
         current_weight = std::max(current_weight, 0.0);
@@ -165,6 +193,7 @@ int main() {
 
     // The plot_cities_and_tour function is not implemented in C++
     // plot_cities_and_tour(cities, salesman.optimal_route);
+    salesman.plotCitiesAndTour();
 
     return 0;
 }
