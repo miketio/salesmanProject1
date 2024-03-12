@@ -1,6 +1,7 @@
 # salesman.py
 import random
 import math
+import numpy as np
 from city import City
 from MCmethods import simulated_annealing, metropolis_hastings
 class Salesman:
@@ -8,6 +9,7 @@ class Salesman:
         # Initialize parameters
         self.cities = cities
         self.total_weight = sum(city.package_weight for city in cities)
+        self.max_weight = self.total_weight
         self.wait_time = 1.0
         self.current_time = 9.0
         self.initial_velocity = 60
@@ -18,6 +20,8 @@ class Salesman:
         self.optimal_route = cities[:]  # Make a copy of the cities list
         self.num_cities = len(cities)
         self.distance_matrix = self._create_distance_matrix()
+        self.slow_time = 1
+        self.slow_weight = 0.1
 
     def _create_distance_matrix(self):
         # Create a matrix to store distances between cities
@@ -43,15 +47,25 @@ class Salesman:
         # Calculate base travel time between two cities based on initial velocity
         return self.calculate_distance(city1, city2) / self.initial_velocity
 
-    def calculate_slowdown_factor(self):
-        # Calculate slowdown factor based on total weight and number of cities
-        max_weight = 3.0
-        return 1.0 + 0.1 * self.total_weight / (max_weight * self.num_cities)
+    def gaussian_function(self, x):
+        mu1 = 8
+        sigma1 = 0.75
+        mu2 = 17
+        sigma2 = 1
+        # Gaussian function for the first distribution
+        gaussian1 = 1 / (sigma1 * np.sqrt(2 * np.pi)) * np.exp(-0.5 * ((x - mu1) / sigma1) ** 2)
+        # Gaussian function for the second distribution
+        gaussian2 = 1 / (sigma2 * np.sqrt(2 * np.pi)) * np.exp(-0.5 * ((x - mu2) / sigma2) ** 2)
+        # Return the sum of the two Gaussian functions
+        return 1*gaussian1 + 2*gaussian2
 
-    def calculate_travel_time(self, city1, city2):
+    def calculate_slowdown_factor(self,time):
+        # Calculate slowdown factor based on total weight and the current time
+        return 1 + self.gaussian_function(time)*self.slow_time +(self.total_weight / self.max_weight) *self.slow_weight
+
+    def calculate_travel_time(self, city1, city2, slowdown_factor):
         # Calculate total travel time between two cities, considering slowdown and waiting time
         base_travel_time = self.calculate_base_travel_time(city1, city2)
-        slowdown_factor = self.calculate_slowdown_factor()
         slowed_travel_time = base_travel_time * slowdown_factor
         return slowed_travel_time + self.wait_time
 
@@ -80,7 +94,7 @@ class Salesman:
         for i in range(len(route)):
             city = route[i]
             next_city = route[(i + 1) % self.num_cities]
-            total_travel_time += self.calculate_travel_time(city, next_city)
+            total_travel_time += self.calculate_travel_time(city, next_city, self.calculate_slowdown_factor(current_time_copy))
             current_time_copy += total_travel_time
             current_time_copy = current_time_copy % 24.0
             current_weight -= next_city.package_weight

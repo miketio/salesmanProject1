@@ -19,6 +19,8 @@ def simulated_annealing(salesman, initial_temperature, cooling_rate, iterations)
     best_salesman = salesman.__class__(salesman.optimal_route)
     best_total_cost = salesman.calculate_total_cost()
     temperature = initial_temperature
+    temperature_progress = []
+    best_total_cost_progress = []# add here a massive of best_total_cost(temperature) in simulated annealing method
 
     for _ in range(iterations):
         new_salesman = salesman.__class__(salesman.optimal_route)
@@ -36,8 +38,10 @@ def simulated_annealing(salesman, initial_temperature, cooling_rate, iterations)
         if salesman.calculate_total_cost() < best_total_cost:
             best_salesman.optimal_route = salesman.optimal_route
             best_total_cost = salesman.calculate_total_cost()
-
+        
+        best_total_cost_progress.append(best_total_cost)
+        temperature_progress.append(temperature)
         temperature *= (1 - cooling_rate)
 
     salesman.optimal_route = best_salesman.optimal_route
-    return best_total_cost
+    return best_total_cost, best_total_cost_progress, temperature_progress
