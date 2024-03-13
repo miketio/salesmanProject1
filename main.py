@@ -41,7 +41,7 @@ def main():
 
         # Run the simulated annealing algorithm
         initial_temperature = 10**8
-        cooling_rate = 0.005
+        cooling_rate = 0.01
         iterations = 3000
         best_cost, best_cost_progress, temperature_progress = simulated_annealing(salesman, initial_temperature, cooling_rate, iterations)
         print(f"Best cost found by simulated annealing with slow_time={slow_time}: {best_cost}")
