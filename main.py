@@ -1,6 +1,7 @@
 # main.py
 import random
 import matplotlib.pyplot as plt
+import numpy as np
 from salesman import Salesman
 from city import City
 from plotting import plot_best_cost_progress
@@ -29,8 +30,7 @@ def main():
     salesman = Salesman(cities)
 
     # List of slow_time values to test
-    slow_times = [1.01, 1.25, 1.3, 1.4, 1.5, 1.6, 1.75, 1.8, 2, 10]
-
+    slow_times= [1.25] * 10 #slow_times = [1.01, 1.25, 1.3, 1.4, 1.5, 1.6, 1.75, 1.8, 2, 10]
     # Lists to store the results for each slow_time value
     temperature_progress_list = []
     best_cost_progress_list = []
@@ -40,8 +40,8 @@ def main():
         salesman.slow_time = slow_time
 
         # Run the simulated annealing algorithm
-        initial_temperature = 100000000
-        cooling_rate = 0.01
+        initial_temperature = 10**8
+        cooling_rate = 0.005
         iterations = 3000
         best_cost, best_cost_progress, temperature_progress = simulated_annealing(salesman, initial_temperature, cooling_rate, iterations)
         print(f"Best cost found by simulated annealing with slow_time={slow_time}: {best_cost}")
@@ -51,7 +51,7 @@ def main():
         temperature_progress_list.append(temperature_progress)
         salesman.optimal_route = cities[:]
     # Plot the best cost progress over temperature for all slow_time values
-    plot_best_cost_progress(temperature_progress_list, best_cost_progress_list, slow_times)
+    plot_best_cost_progress(temperature_progress_list, best_cost_progress_list, slow_times,plot_average=True)
 
 if __name__ == "__main__":
     main()
