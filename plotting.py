@@ -17,7 +17,6 @@ def plot_best_cost_progress(temperature_progress_list, best_cost_progress_list, 
         average_best_cost = np.mean(best_cost_progress_list, axis=0)
         best_cost_array = np.array(best_cost_progress_list)
         squared_best_cost_array = np.square(best_cost_array)
-        squared_average_best_cost = np.mean(squared_best_cost_array, axis=0)
 
         plt.plot(temperature_progress_list[0], average_best_cost, 'r-', linewidth=3, label='Average Best Cost')
         plt.legend(loc='best')
@@ -33,14 +32,58 @@ def plot_best_cost_progress(temperature_progress_list, best_cost_progress_list, 
     plt.grid(True)
     # Set the x-axis and y-axis to logarithmic scale
     plt.xscale('log')
-    plt.yscale('log')
     plt.show()
     if plot_average:
-        plot_derivation_best_cost_С(temperature_progress_list[0], average_best_cost, squared_average_best_cost)
+        #plot_derivation_best_cost_С(temperature_progress_list[0], average_best_cost)
+        plot_average_best_cost_derivative(np.log(temperature_progress_list[0]), average_best_cost, process_variance=1e-5, measurement_variance=0.8)
+ 
 
-def plot_derivation_best_cost_С(temperature_progress, average_best_cost,squared_average_best_cost):
-    pass
+def kalman_filter(data, process_variance, measurement_variance):
+    # Initial state estimation (can be set based on prior knowledge)
+    x_est = data[0]
+    
+    # Initial estimation covariance
+    P_est = 1
+    
+    # Kalman gain
+    K = 0
+    
+    # Filtered data
+    filtered_data = []
+    
+    for measurement in data:
+        # Prediction step
+        x_pred = x_est
+        P_pred = P_est + process_variance
+        
+        # Update step
+        K = P_pred / (P_pred + measurement_variance)
+        x_est = x_pred + K * (measurement - x_pred)
+        P_est = (1 - K) * P_pred
+        
+        filtered_data.append(x_est)
+    
+    return np.array(filtered_data)
 
+def plot_average_best_cost_derivative(temperature_progress, average_best_cost, process_variance=0.01, measurement_variance=0.1):
+    # Apply Kalman filter to smooth the data
+    smoothed_average_best_cost = kalman_filter(average_best_cost, process_variance, measurement_variance)
+    
+    # Calculate the derivative of the smoothed average best cost
+    derivative_average_best_cost = np.gradient(smoothed_average_best_cost, temperature_progress)
+    
+    # Plot the derivative of the smoothed average best cost
+    plt.figure(figsize=(10, 5))
+    plt.plot(np.exp(temperature_progress), derivative_average_best_cost, 'g-', linewidth=2, label='Derivative of Smoothed Average Best Cost')
+    plt.xlabel('Temperature Progress')
+    plt.ylabel('Derivative')
+    plt.title('Derivative of Smoothed Average Best Cost (Kalman Filter)')
+    plt.legend()
+    plt.grid(True)
+    plt.xscale('log')
+    plt.xlim(np.exp(-10),np.exp(20))
+    plt.ylim(0,2000)
+    plt.show()
 
 def plot_cities_and_tour(cities, tour):
     x_coords = [city.x for city in cities]
