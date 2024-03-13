@@ -4,6 +4,8 @@ import math
 import numpy as np
 from city import City
 from MCmethods import simulated_annealing, metropolis_hastings
+from math_functions import gaussian_function
+
 class Salesman:
     def __init__(self, cities):
         # Initialize parameters
@@ -47,21 +49,9 @@ class Salesman:
         # Calculate base travel time between two cities based on initial velocity
         return self.calculate_distance(city1, city2) / self.initial_velocity
 
-    def gaussian_function(self, x):
-        mu1 = 8
-        sigma1 = 0.75
-        mu2 = 17
-        sigma2 = 1
-        # Gaussian function for the first distribution
-        gaussian1 = 1 / (sigma1 * np.sqrt(2 * np.pi)) * np.exp(-0.5 * ((x - mu1) / sigma1) ** 2)
-        # Gaussian function for the second distribution
-        gaussian2 = 1 / (sigma2 * np.sqrt(2 * np.pi)) * np.exp(-0.5 * ((x - mu2) / sigma2) ** 2)
-        # Return the sum of the two Gaussian functions
-        return 1*gaussian1 + 2*gaussian2
-
     def calculate_slowdown_factor(self,time):
         # Calculate slowdown factor based on total weight and the current time
-        return 1 + self.gaussian_function(time)*self.slow_time +(self.total_weight / self.max_weight) *self.slow_weight
+        return 1 + gaussian_function(time)*self.slow_time +(self.total_weight / self.max_weight) *self.slow_weight
 
     def calculate_travel_time(self, city1, city2, slowdown_factor):
         # Calculate total travel time between two cities, considering slowdown and waiting time
