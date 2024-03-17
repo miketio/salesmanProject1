@@ -13,6 +13,7 @@ def gaussian_function(x):
     # Return the sum of the two Gaussian functions
     return 1*gaussian1 + 2*gaussian2
 
+
 def kalman_filter(data, process_variance, measurement_variance):
     # Initial state estimation (can be set based on prior knowledge)
     x_est = data[0]

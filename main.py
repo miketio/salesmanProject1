@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from salesman import Salesman
 from city import City
-from plotting import plot_best_cost_progress
+from plotting import plot_best_cost_progress, plot_cities_and_tour
 from MCmethods import simulated_annealing
 
 def load_cities_from_file(file_path):
@@ -30,28 +30,48 @@ def main():
     salesman = Salesman(cities)
 
     # List of slow_time values to test
-    slow_times= [1.25] * 10 #slow_times = [1.01, 1.25, 1.3, 1.4, 1.5, 1.6, 1.75, 1.8, 2, 10]
+    #slow_time
+    #
+    #dif_parameters = [1.01, 2, 5] # slow_time
+    #dif_parameters = [7, 9, 12, 22] # current_time
+    dif_parameters = [10, 50, 100] #  fuel_cost_per_liter
+    #dif_parameters = [60, 80, 100] #   initial_velocity
+    #dif_parameters = [200]#  price per hour
     # Lists to store the results for each slow_time value
-    temperature_progress_list = []
-    best_cost_progress_list = []
+    number_of_average = 10
 
-    for slow_time in slow_times:
-        # Set the slow_time parameter
-        salesman.slow_time = slow_time
+    average_best_cost = []
 
-        # Run the simulated annealing algorithm
-        initial_temperature = 10**8
-        cooling_rate = 0.01
-        iterations = 3000
-        best_cost, best_cost_progress, temperature_progress = simulated_annealing(salesman, initial_temperature, cooling_rate, iterations)
-        print(f"Best cost found by simulated annealing with slow_time={slow_time}: {best_cost}")
+    for parameters in dif_parameters:
 
-        # Store the results for plotting
-        best_cost_progress_list.append(best_cost_progress)
-        temperature_progress_list.append(temperature_progress)
-        salesman.optimal_route = cities[:]
+        best_cost_progress_list = []
+        copied_parameters= [parameters]*number_of_average
+        number = 0
+        for parameter in copied_parameters:
+            number+=1
+            salesman.optimal_route = cities[:]
+            # Set the parameter
+            #salesman.slow_time = parameter #slow_time
+            #salesman.current_time = parameter #current_time
+            salesman.fuel_cost_per_liter = parameter #fuel_cost_per_liter
+            #salesman.initial_velocity = parameter #initial_velocity
+            #salesman.hourly_salary = parameter #hourly_salary
+            # Run the simulated annealing algorithm
+            initial_temperature = 10**8
+            cooling_rate = 0.01
+            iterations = 3000
+            
+
+            best_cost, best_cost_progress, temperature_progress = simulated_annealing(salesman, initial_temperature, cooling_rate, iterations)
+            print(f"Best cost found by simulated annealing with slow_time={parameter} (number {number} of {len(copied_parameters)}): {best_cost}")
+            #plot_cities_and_tour(salesman.cities,salesman.optimal_route)
+            # Store the results for plotting
+            best_cost_progress_list.append(best_cost_progress)
+        #plot_best_cost_progress(temperature_progress, best_cost_progress_list, copied_parameters,plot_average=True)
+        average_best_cost.append(np.mean(best_cost_progress_list, axis=0))    
     # Plot the best cost progress over temperature for all slow_time values
-    plot_best_cost_progress(temperature_progress_list, best_cost_progress_list, slow_times,plot_average=True)
+    plot_cities_and_tour(salesman.cities,salesman.optimal_route)
+    plot_best_cost_progress(temperature_progress, average_best_cost, dif_parameters,plot_average=False)
 
 if __name__ == "__main__":
     main()
