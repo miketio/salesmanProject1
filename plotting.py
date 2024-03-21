@@ -79,11 +79,12 @@ def plot_gaussian_function(start=0, end=24, num_points=1000):
     # Plotting
     plt.figure(figsize=(10, 5))
     plt.plot(x, y, label='Trafic function')
-    plt.xlabel('x')
-    plt.ylabel('f(x)')
-    plt.title('Sum of Two Gaussian Functions')
+    plt.xlabel('Time, hours')
+    plt.ylabel('η$_{time}$', fontsize=12)
+    plt.title('η$_{time}$ over time')
     plt.legend()
     plt.grid(True)
+    plt.xlim(0,24)
     plt.show()
 
 #plot_gaussian_function()

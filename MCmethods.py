@@ -2,14 +2,14 @@
 import random
 import math
 
-def metropolis_hastings(salesman, iterations):
+def random_walk(salesman, iterations):
     for _ in range(iterations):
         city_index1, city_index2 = random.sample(range(salesman.num_cities), 2)
         new_route = salesman.optimal_route[:]
         new_route[city_index1], new_route[city_index2] = new_route[city_index2], new_route[city_index1]
         current_total_cost = salesman.calculate_total_cost(salesman.optimal_route)
         new_total_cost = salesman.calculate_total_cost(new_route)
-        acceptance_probability = min(1, math.exp((current_total_cost - new_total_cost) / salesman.current_time))
+        acceptance_probability = min(1, math.exp((current_total_cost - new_total_cost)))
         if random.random() < acceptance_probability:
             salesman.optimal_route = new_route
     best_total_cost = salesman.calculate_total_cost()
