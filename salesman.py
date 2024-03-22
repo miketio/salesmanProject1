@@ -3,7 +3,7 @@ import random
 import math
 import numpy as np
 from city import City
-from MCmethods import simulated_annealing, metropolis_hastings
+from MCmethods import simulated_annealing, random_walk
 from math_functions import gaussian_function
 
 class Salesman:
@@ -95,5 +95,5 @@ class Salesman:
         return simulated_annealing(self, initial_temperature, cooling_rate, iterations)
 
 
-    def metropolis_hastings(self, iterations):
-        return metropolis_hastings(self, iterations)
+    def random_walk(self, iterations):
+        return random_walk(self, iterations)

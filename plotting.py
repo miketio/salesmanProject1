@@ -3,36 +3,87 @@ import matplotlib.pyplot as plt
 import numpy as np
 from math_functions import kalman_filter, gaussian_function
 
-def plot_best_cost_progress(temperature_progress, best_cost_progress_list, slow_time_list, plot_average=False):
-    plt.figure(figsize=(10, 5))
-    for i, (slow_time, best_cost_progress) in enumerate(zip(slow_time_list, best_cost_progress_list)):
-        line_style = '--' if plot_average else '-'
-        color = 'black' if plot_average else f'C{i}'  # Cycle through default colors
-        line_width = 1 if plot_average else 2
-        label = None if plot_average else f'slow_time={slow_time}'
-        plt.plot(temperature_progress, best_cost_progress, linestyle=line_style, color=color, linewidth=line_width, label=label)
-        plt.title('Best Cost Progress over Temperature for Different Slowdown Factors')
-
+def plot_best_cost_progress(temperature_progress, best_cost_progress_list, squared_best_cost, slow_time_list, plot_average=False, C_func = False):
     if plot_average:
+        fig = plt.figure(figsize=(10, 5))
+        ax1 = fig.add_subplot(1, 2, 1)
+        line_style = '--'
+        color = 'black'
+        line_width = 1
+        label = None
         # Calculate the average best cost for each temperature progress
         average_best_cost = np.mean(best_cost_progress_list, axis=0)
-        plt.plot(temperature_progress, average_best_cost, 'r-', linewidth=3, label='Average Best Cost')
-        plt.legend(loc='best')
+        ax1.plot(temperature_progress, average_best_cost, 'r-', linewidth=3, label='Average Best Cost')
+        ax1.legend(loc='best')
         # Add a legend for the dashed lines
-        plt.plot([], [], 'k--', label='Single solution (one at a time)')
-        plt.legend(loc='best')
-        plt.title('Average Best Cost over Temperature')
+        ax1.plot([], [], 'k--', label='Single solution (one at a time)')
+        ax1.legend(loc='best')
+        ax1.set_xlabel('Temperature')
+        ax1.set_ylabel('Best Cost')
+        ax1.legend()
+        ax1.grid(True)
+        # Set the x-axis and y-axis to logarithmic scale
+        ax1.set_xscale('log')
+        smoothed_average_best_cost = kalman_filter(average_best_cost, process_variance=1e-5, measurement_variance=0.1)
         
-    plt.xlabel('Temperature')
-    plt.ylabel('Best Cost')
-    
-    plt.legend()
-    plt.grid(True)
-    # Set the x-axis and y-axis to logarithmic scale
-    plt.xscale('log')
-    plt.show()
-    if plot_average:
-        plot_average_best_cost_derivative(np.log(temperature_progress), average_best_cost, process_variance=1e-5, measurement_variance=0.8)
+        # Calculate the derivative of the smoothed average best cost
+        derivative_average_best_cost = np.gradient(smoothed_average_best_cost, np.log(temperature_progress))
+        
+        # Plot the derivative of the smoothed average best cost
+        ax2 = fig.add_subplot(1, 2, 2)
+        ax2.plot(np.exp(temperature_progress)[30:], derivative_average_best_cost[30:], 'g-', linewidth=2, label='Derivative of Smoothed Average Best Cost')
+        ax2.set_xlabel('Temperature Progress')
+        ax2.set_ylabel('Derivative')
+        ax2.set_title('Derivative of Smoothed Average Best Cost')
+        ax2.legend()
+        ax2.grid(True)
+        ax2.set_xscale('log')
+        ax2.set_xlim(np.exp(-15),np.exp(20))
+        ax2.set_ylim(0,2000)
+        plt.show()
+
+    else:
+        fig = plt.figure(figsize=(15, 5))
+        ax1 = fig.add_subplot(1, 3, 1)
+        ax2 = fig.add_subplot(1, 3, 2)
+        ax3 = fig.add_subplot(1, 3, 3)
+        for i, (slow_time, best_cost_progress, squared_progress) in enumerate(zip(slow_time_list, best_cost_progress_list,squared_best_cost)):
+            line_style = '-'
+            color = f'C{i}'  # Cycle through default colors
+            line_width = 2
+            label = f'initial velocity ={slow_time}'            
+            ax1.plot(temperature_progress, best_cost_progress, linestyle=line_style, color=color, linewidth=line_width, label=label)
+            #ax1.set_title('Best Cost Progress over Temperature for Different Slowdown Factors')
+            ax1.set_xlabel('Temperature')
+            ax1.set_ylabel('Best Cost')
+            ax1.set_xscale('log')
+            ax1.legend()
+            ax1.grid(True)
+            ax1.set_xlim(np.exp(-15),np.exp(20))
+
+            smoothed_average_best_cost = kalman_filter(best_cost_progress, process_variance=1e-5, measurement_variance=0.1)
+            derivative_average_best_cost = np.gradient(smoothed_average_best_cost, np.log(temperature_progress))
+            ax2.plot((temperature_progress)[30:], derivative_average_best_cost[30:], linestyle=line_style, color=color, linewidth=line_width, label=label)
+            ax2.set_xlabel('Temperature Progress')
+            ax2.set_ylabel('Derivative')
+            #ax2.set_title('Derivative of Smoothed Average Best Cost')
+            ax2.legend()
+            ax2.grid(True)
+            ax2.set_xscale('log')
+            ax2.set_xlim(np.exp(-15),np.exp(20))
+            ax2.set_ylim(0,2000)
+
+            variance = kalman_filter(squared_progress - np.square(best_cost_progress), process_variance=0.01, measurement_variance=0.1)#/np.square(temperature_progress)
+            ax3.plot(temperature_progress, variance, linestyle=line_style, color=color, linewidth=line_width, label=label)
+            #ax3.set_title('Variance')
+            ax3.set_xlabel('Temperature')
+            ax3.set_ylabel('Variance')
+            plt.legend()
+            plt.grid(True)
+            ax3.set_xscale('log')
+            ax3.set_xlim(np.exp(-15),np.exp(20))
+        plt.show()
+
 
 def plot_average_best_cost_derivative(temperature_progress, average_best_cost, process_variance=0.01, measurement_variance=0.1):
     # Apply Kalman filter to smooth the data
@@ -87,4 +138,6 @@ def plot_gaussian_function(start=0, end=24, num_points=1000):
     plt.xlim(0,24)
     plt.show()
 
+def plot_C_function():
+    pass
 #plot_gaussian_function()
