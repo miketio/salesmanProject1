@@ -35,10 +35,10 @@ def main():
     #dif_parameters = [1.01, 2, 5] # slow_time
     #dif_parameters = [7, 9, 12, 22] # current_time
     #dif_parameters = [50] #  fuel_cost_per_liter
-    dif_parameters = [60, 80, 100] #   initial_velocity
+    dif_parameters = [40,50,60,70,80,90] #   initial_velocity
     #dif_parameters = [200]#  price per hour
     # Lists to store the results for each slow_time value
-    number_of_average = 1
+    number_of_average = 10
 
     average_best_cost = []
     squared_best_cost = []
@@ -63,8 +63,8 @@ def main():
             salesman.initial_velocity = parameter #initial_velocity
             #salesman.hourly_salary = parameter #hourly_salary
             # Run the simulated annealing algorithm
-            initial_temperature = 10**14
-            cooling_rate = 0.2
+            initial_temperature = 1e30
+            cooling_rate = 0.05
             iterations = 3000
             
 
