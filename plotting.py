@@ -175,13 +175,15 @@ def plot_salaries(temperature_progress, total_cost_list, salary_list, gas_list, 
         label = f'initial velocity ={slow_time}' 
 
         ax1.plot(temperature_progress, best_cost_progress, linestyle=line_style, color=color, linewidth=line_width, label=label)
+        ax1.plot(temperature_progress, salary+gas, linestyle=line_style, color=color, linewidth=line_width, label=label)
+        
         #ax1.set_title('Best Cost Progress over Temperature for Different Slowdown Factors')
         ax1.set_xlabel('Temperature')
         ax1.set_ylabel('C$_{total}$', fontsize=12)
         ax1.set_xscale('log')
         ax1.legend()
         ax1.grid(True)
-        ax1.set_xlim(np.exp(-15),np.exp(20))
+        ax1.set_xlim(10**-15,10**14)
 
         ax2.plot(temperature_progress, salary, linestyle=line_style, color=color, linewidth=line_width, label=label)
         #ax1.set_title('Best Cost Progress over Temperature for Different Slowdown Factors')
@@ -190,7 +192,7 @@ def plot_salaries(temperature_progress, total_cost_list, salary_list, gas_list, 
         ax2.set_xscale('log')
         ax2.legend()
         ax2.grid(True)
-        ax2.set_xlim(np.exp(-15),np.exp(20))
+        ax2.set_xlim(10**-15,10**14)
 
         ax3.plot(temperature_progress, gas, linestyle=line_style, color=color, linewidth=line_width, label=label)
         #ax1.set_title('Best Cost Progress over Temperature for Different Slowdown Factors')
@@ -199,5 +201,5 @@ def plot_salaries(temperature_progress, total_cost_list, salary_list, gas_list, 
         ax3.set_xscale('log')
         ax3.legend()
         ax3.grid(True)
-        ax3.set_xlim(np.exp(-15),np.exp(20))
+        ax3.set_xlim(10**-15,10**14)
     plt.show()

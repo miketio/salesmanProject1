@@ -12,7 +12,7 @@ class Salesman:
         self.cities = cities
         self.total_weight = sum(city.package_weight for city in cities)
         self.max_weight = self.total_weight
-        self.wait_time = 1.0
+        self.wait_time = 0.0
         self.current_time = 9.0
         self.initial_velocity = 60
         self.hourly_salary = 200  # Example hourly salary

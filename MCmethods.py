@@ -18,6 +18,8 @@ def random_walk(salesman, iterations):
 def simulated_annealing(salesman, initial_temperature, cooling_rate, iterations):
     best_salesman = salesman.__class__(salesman.optimal_route)
     best_total_cost = salesman.calculate_total_cost()
+    salary = salesman.calculate_separated_cost()[0]
+    gas = salesman.calculate_separated_cost()[1]
     temperature = initial_temperature
     temperature_progress = []
     best_total_cost_progress = []# add here a massive of best_total_cost(temperature) in simulated annealing method
@@ -40,10 +42,12 @@ def simulated_annealing(salesman, initial_temperature, cooling_rate, iterations)
         if salesman.calculate_total_cost() < best_total_cost:
             best_salesman.optimal_route = salesman.optimal_route
             best_total_cost = salesman.calculate_total_cost()
-        
+            gas = salesman.calculate_separated_cost()[1]
+            salary = salesman.calculate_separated_cost()[0]
+
         best_total_cost_progress.append(best_total_cost)
-        salary_progress.append(salesman.calculate_separated_cost()[0])
-        gas_progress.append(salesman.calculate_separated_cost()[1])
+        salary_progress.append(salary)
+        gas_progress.append(gas)
         temperature_progress.append(temperature)
         temperature *= (1 - cooling_rate)
         time_progress.append(salesman.calculate_total_travel_time()[0])
