@@ -21,7 +21,9 @@ def simulated_annealing(salesman, initial_temperature, cooling_rate, iterations)
     temperature = initial_temperature
     temperature_progress = []
     best_total_cost_progress = []# add here a massive of best_total_cost(temperature) in simulated annealing method
-
+    time_progress = []
+    salary_progress = []
+    gas_progress = []
     for _ in range(iterations):
         new_salesman = salesman.__class__(salesman.optimal_route)
         city_index1 = random.randint(0, salesman.num_cities - 1)
@@ -40,8 +42,10 @@ def simulated_annealing(salesman, initial_temperature, cooling_rate, iterations)
             best_total_cost = salesman.calculate_total_cost()
         
         best_total_cost_progress.append(best_total_cost)
+        salary_progress.append(salesman.calculate_separated_cost()[0])
+        gas_progress.append(salesman.calculate_separated_cost()[1])
         temperature_progress.append(temperature)
         temperature *= (1 - cooling_rate)
-
+        time_progress.append(salesman.calculate_total_travel_time()[0])
     salesman.optimal_route = best_salesman.optimal_route
-    return best_total_cost, best_total_cost_progress, temperature_progress
+    return best_total_cost, best_total_cost_progress, temperature_progress, time_progress, salary_progress, gas_progress

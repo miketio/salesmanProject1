@@ -71,7 +71,13 @@ class Salesman:
             route = self.optimal_route
         total_travel_time, _, fuel_wasted = self.calculate_total_travel_time(route)
         return total_travel_time * self.hourly_salary + fuel_wasted * self.fuel_cost_per_liter
-
+    def calculate_separated_cost(self, route = None):
+        if route is None:
+            route = self.optimal_route
+        total_travel_time, _, fuel_wasted = self.calculate_total_travel_time(route)
+        salary = total_travel_time * self.hourly_salary
+        gas = fuel_wasted * self.fuel_cost_per_liter
+        return salary, gas
     def calculate_total_travel_time(self, route=None):
         # Calculate the total travel time for a given route
         if route is None:
@@ -82,13 +88,17 @@ class Salesman:
         fuel_wasted = 0.0
 
         for i in range(len(route)):
+            
             city = route[i]
             next_city = route[(i + 1) % self.num_cities]
-            total_travel_time += self.calculate_travel_time(city, next_city, self.calculate_slowdown_factor(current_time_copy))
-            current_time_copy += total_travel_time
+            move_time = self.calculate_travel_time(city, next_city, self.calculate_slowdown_factor(current_time_copy))
+            total_travel_time += move_time
+            current_time_copy += move_time
             current_time_copy = current_time_copy % 24.0
             current_weight -= next_city.package_weight
             fuel_wasted += self.calculate_fuel_wasted(city, next_city)
+            #print(move_time, current_time_copy, total_travel_time)
+        #print('\n')
         return total_travel_time, current_time_copy, fuel_wasted
 
     def simulated_annealing(self, initial_temperature, cooling_rate, iterations):
