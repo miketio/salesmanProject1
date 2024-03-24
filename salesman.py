@@ -22,7 +22,7 @@ class Salesman:
         self.optimal_route = cities[:]  # Make a copy of the cities list
         self.num_cities = len(cities)
         self.distance_matrix = self._create_distance_matrix()
-        self.slow_time = 1
+        self.slow_time = 10
         self.slow_weight = 0.1
 
     def _create_distance_matrix(self):

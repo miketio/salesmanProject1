@@ -15,4 +15,4 @@ def write_cities_to_file(file_path, num_cities):
             file.write(f"{x} {y} {weight}\n")
 
 # Генерация и запись 30 случайных городов в файл
-write_cities_to_file('cities.txt', 30)
+write_cities_to_file('cities_small.txt', 8)
